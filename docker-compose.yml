@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  server:
+    container_name: NODE_SERVER
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/node-app
+      - ./node_modules:/node-app/node_modules
+    environment:
+      NODE_ENV: development
+      REDIS_URL: redis://redis_cache:6379
+      MONGO_URL: mongodb://mongo_db:27017/filas
+    command: yarn all
+    ports:
+      - '3333:3333'
+    depends_on:
+      - mongo_db
+      - redis_cache
+    links:
+      - mongo_db
+      - redis_cache
+
+  mongo_db:
+    image: mongo
+    container_name: MONGO_DB
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./data/db:/data/db
+
+  redis_cache:
+    container_name: REDIS
+    image: redis:alpine
+    volumes:
+      - ./data:/redis/db
+    ports:
+      - '6379:6379'
